@@ -167,6 +167,8 @@ _**Note:** these tools will be unavailable if the server is [scoped to a project
 
 #### Edge Function Management
 
+_**Note:** These edge functions require the server to be [scoped to a project](#project-scoped-mode).
+
 - `list_edge_functions`: Lists all Edge Functions in a Supabase project.
 - `deploy_edge_function`: Deploys a new Edge Function to a Supabase project. LLMs can use this to deploy new functions or update existing ones.
 
