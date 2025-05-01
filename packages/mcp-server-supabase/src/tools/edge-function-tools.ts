@@ -15,6 +15,11 @@ export function getEdgeFunctionTools({
   managementApiClient,
   projectId,
 }: EdgeFunctionToolsOptions) {
+  // Assert that projectId is not null or undefined
+  if (!projectId) {
+    throw new Error("The 'projectId' parameter is required and cannot be null or undefined.");
+  }
+
   const project_id = projectId;
 
   return {
