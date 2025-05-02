@@ -1,25 +1,55 @@
+// --- Imports Summary ---
+// `z` (from zod):
+//   - Used for validating tool parameters.
+// `edgeFunctionExample`, `getFullEdgeFunction` (from edge-function.js):
+//   - Example usage for deploying Edge Functions and fetching detailed information.
+// `assertSuccess`, `ManagementApiClient` (from management-api/index.js):
+//   - Utility for validating API responses and the type for the API client.
+// `injectableTool` (from util.js):
+//   - Utility for creating reusable and injectable tools.
+
 import { z } from 'zod';
 import { edgeFunctionExample, getFullEdgeFunction } from '../edge-function.js';
-import {
-  assertSuccess,
-  type ManagementApiClient,
-} from '../management-api/index.js';
+import { assertSuccess, type ManagementApiClient } from '../management-api/index.js';
 import { injectableTool } from './util.js';
 
+// --- Exports Summary ---
+// `getEdgeFunctionTools`:
+//   - Initializes tools for managing Edge Functions in a Supabase project.
+//   - Parameters:
+//     - `managementApiClient`: The API client used for interacting with Supabase.
+//     - `projectId?`: Optional project ID to scope the tools.
+//   - Returns: An object with tools for listing and deploying Edge Functions.
+//
+// `list_edge_functions`:
+//   - Lists all Edge Functions in a Supabase project.
+//   - Parameters:
+//     - `project_id`: The ID of the project to fetch Edge Functions from.
+//   - Returns: A list of detailed information about Edge Functions.
+//
+// `deploy_edge_function`:
+//   - Deploys an Edge Function to a Supabase project.
+//   - Parameters:
+//     - `project_id`: The ID of the project.
+//     - `name`: The name of the function.
+//     - `entrypoint_path`: The entry point of the function (default: `index.ts`).
+//     - `import_map_path?`: Optional import map for the function.
+//     - `files`: Array of files (name and content) to upload.
+//   - Returns: The API response for the deployment.
 export type EdgeFunctionToolsOptions = {
   managementApiClient: ManagementApiClient;
-  projectId?: string;
+  projectId?: string; // Optional parameter
 };
 
-export function getEdgeFunctionTools({
+
+export function getEdgeFunctionTools(
+  {
   managementApiClient,
   projectId,
-}: EdgeFunctionToolsOptions) {
-  // Assert that projectId is not null or undefined
-  if (!projectId) {
-    throw new Error("The 'projectId' parameter is required and cannot be null or undefined.");
-  }
-
+  }: EdgeFunctionToolsOptions){
+  managementApiClient: ManagementApiClient;
+  projectId?: string;
+}) {
   const project_id = projectId;
 
   return {
@@ -43,7 +73,6 @@ export function getEdgeFunctionTools({
 
         assertSuccess(response, 'Failed to fetch Edge Functions');
 
-        // Fetch files for each Edge Function
         const edgeFunctions = await Promise.all(
           response.data.map(async (listedFunction) => {
             const { data: edgeFunction, error } = await getFullEdgeFunction(
@@ -61,10 +90,11 @@ export function getEdgeFunctionTools({
         );
 
         return edgeFunctions;
-      },
-    }),
-    deploy_edge_function: injectableTool({
-      description: `Deploys an Edge Function to a Supabase project. If the function already exists, this will create a new version. Example:\n\n${edgeFunctionExample}`,
+      });
+
+  // DOnt touch  ode below here for now
+       export function  deploy_edge_function: injectableTool({
+      description: `Deploys an Edge Function to a Supabase project. If the function already exists, this will create a new version.`,
       parameters: z.object({
         project_id: z.string(),
         name: z.string().describe('The name of the function'),
@@ -105,7 +135,6 @@ export function getEdgeFunctionTools({
           ['deno.json', 'import_map.json'].includes(file.name)
         );
 
-        // Use existing import map path or file name heuristic if not provided
         import_map_path ??=
           existingEdgeFunction?.import_map_path ?? import_map_file?.name;
 
@@ -124,7 +153,7 @@ export function getEdgeFunctionTools({
                 entrypoint_path,
                 import_map_path,
               },
-              file: files as any, // We need to pass file name and content to our serializer
+              file: files as any,
             },
             bodySerializer(body) {
               const formData = new FormData();
@@ -153,4 +182,4 @@ export function getEdgeFunctionTools({
       },
     }),
   };
-}
+};
