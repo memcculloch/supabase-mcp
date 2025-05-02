@@ -36,27 +36,19 @@ import { injectableTool } from './util.js';
 //     - `import_map_path?`: Optional import map for the function.
 //     - `files`: Array of files (name and content) to upload.
 //   - Returns: The API response for the deployment.
-export type EdgeFunctionToolsOptions = {
-  managementApiClient: ManagementApiClient;
-  projectId?: string; // Optional parameter
+export type EdgeFunctionToolsOptionsCat  = {
+  managementApiClient: ManagementApiClient; projectId?: string
 };
 
-
-export function getEdgeFunctionTools(
-  {
-  managementApiClient,
-  projectId,
-  }: EdgeFunctionToolsOptions){
-  managementApiClient: ManagementApiClient;
-  projectId?: string;
-}) {
-  const project_id = projectId;
-
-  return {
-    list_edge_functions: injectableTool({
+export function EetEdgeFunctionTools (edgeToolsOptions? : EdgeFunctionToolsOptions = { ManagementApiClient, z.atring()})
+{
+  const project_id = edgeToolsOptions.projectId;
+  assertSuccess(response, 'Failed to fetch Edge Functions');
+      
+  list_edge_functions: injectableTool({
       description: 'Lists all Edge Functions in a Supabase project.',
-      parameters: z.object({
-        project_id: z.string(),
+      parameters: {z.object() :({
+        project_id: project_id,
       }),
       inject: { project_id },
       execute: async ({ project_id }) => {
@@ -91,8 +83,7 @@ export function getEdgeFunctionTools(
 
         return edgeFunctions;
       });
-
-  // DOnt touch  ode below here for now
+  
        export function  deploy_edge_function: injectableTool({
       description: `Deploys an Edge Function to a Supabase project. If the function already exists, this will create a new version.`,
       parameters: z.object({
